@@ -151,7 +151,68 @@ Today:
 - Deduplicates by ticket key across PRs and Jira
 - Edit lists in place (`-N` remove, text add) instead of retyping
 - Today's list pre-selects carried-over tickets and in-progress statuses
-- Copies output to clipboard via `wl-copy`, `xclip` or `xsel`
+- Copies output to clipboard (`wl-copy`/`xclip`/`xsel` on Linux, `pbcopy` on macOS, `clip` on Windows)
+
+## Desktop Shortcut
+
+Double-click to run the standup in a terminal that stays open until you press Enter. Replace `/path/to/standup-generator` with where you cloned it.
+
+### Linux (GNOME, KDE, etc.)
+
+```bash
+cat > ~/Desktop/standup.sh <<'EOF'
+#!/usr/bin/env bash
+cd /path/to/standup-generator && python3 standup.py "$@"
+read -rp "Press Enter to close..."
+EOF
+chmod +x ~/Desktop/standup.sh
+
+cat > ~/Desktop/Standup.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=Standup Generator
+Exec=$HOME/Desktop/standup.sh
+Terminal=true
+Icon=utilities-terminal
+EOF
+chmod +x ~/Desktop/Standup.desktop
+```
+
+If the desktop shows an "untrusted launcher" warning the first time, right-click the icon and choose **Allow Launching**. Clipboard needs `wl-copy` (Wayland) or `xclip`/`xsel` (X11).
+
+### macOS
+
+```bash
+cat > ~/Desktop/standup.command <<'EOF'
+#!/usr/bin/env bash
+cd /path/to/standup-generator && python3 standup.py "$@"
+read -rp "Press Enter to close..."
+EOF
+chmod +x ~/Desktop/standup.command
+```
+
+`.command` files open in Terminal on double-click. If macOS blocks it ("cannot be opened because it is from an unidentified developer"), right-click the file and choose **Open** once, or run `xattr -d com.apple.quarantine ~/Desktop/standup.command`. Output is copied via the built-in `pbcopy`.
+
+### Windows
+
+Save this as `standup.bat` on the Desktop (in Notepad, choose "All files" as the type):
+
+```bat
+@echo off
+cd /d C:\path\to\standup-generator
+python standup.py %*
+pause
+```
+
+Notes:
+- Use `python` (the Windows launcher), not `python3`. Install from python.org with "Add to PATH" ticked.
+- `gh` must be installed and logged in: `winget install GitHub.cli`, then `gh auth login`.
+- Output is copied via the built-in `clip` command.
+- Optional: right-click the `.bat`, choose **Create shortcut**, then pick an icon under Properties, **Change Icon**.
+
+### Passing flags
+
+All three launchers forward arguments, so a shortcut can hard-code a lookback: `standup.sh --days 2`, or edit the `.bat` to `python standup.py --plain`.
 
 ## Data Sources
 
