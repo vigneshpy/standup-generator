@@ -4,8 +4,8 @@ CLI tool that auto-generates your daily standup by fetching data from GitHub and
 
 ## What It Does
 
-1. **Yesterday's tasks** — Fetches merged PRs from GitHub + updated Jira tickets from the current sprint
-2. **Today's tasks** — Shows your active Jira tickets (current sprint, not done) and lets you pick by number
+1. **Last working day's tasks** — Merged, raised and reviewed PRs from GitHub + updated Jira tickets from the current sprint
+2. **Today's tasks** — Your active sprint tickets, with carried-over and in-progress ones pre-selected; Enter accepts
 3. **Formats & copies** — Outputs the standup in your team's format and copies it to clipboard
 
 ## Output Format
@@ -44,8 +44,8 @@ gh auth login
 1. Clone the repo:
 
 ```bash
-git clone https://github.com/vigneshpy/slack-remainder.git
-cd slack-remainder
+git clone https://github.com/vigneshpy/standup-generator.git
+cd standup-generator
 ```
 
 2. Install dependencies:
@@ -68,7 +68,6 @@ GITHUB_ORGS=org1,org2
 
 JIRA_DOMAIN=your-company.atlassian.net
 JIRA_EMAIL=your-email@company.com
-JIRA_ACCOUNT_ID=your-jira-account-id
 JIRA_API_TOKEN=your-jira-api-token
 ```
 
@@ -78,7 +77,6 @@ Or set them globally in `~/.bashrc`:
 export JIRA_DOMAIN=your-company.atlassian.net
 export JIRA_EMAIL=your-email@company.com
 export JIRA_API_TOKEN=your-jira-api-token
-export JIRA_ACCOUNT_ID=your-jira-account-id
 export GITHUB_USERNAME=your-github-username
 export GITHUB_ORGS=org1,org2
 ```
@@ -86,8 +84,14 @@ export GITHUB_ORGS=org1,org2
 ## Usage
 
 ```bash
-python3 standup.py
+python3 standup.py                    # looks back to the last working day
+python3 standup.py --since 2026-09-17 # after a holiday: look back to a specific date
+python3 standup.py --days 2           # or N days
 ```
+
+Editing prompts: `Enter` keeps the list, `-2` removes item 2, `+3` adds ticket 3, `1,4` picks exactly, any other text is added as a custom task.
+
+Optional `.env`: `STANDUP_DEFAULT_STATUSES=In Progress,Code In Review` controls which statuses are pre-selected for Today.
 
 ### Workflow
 
@@ -139,15 +143,16 @@ Today:
 
 ### Features
 
-- Skips weekends automatically (Monday looks back to Friday)
-- Deduplicates tasks (if a Jira ticket key appears in a PR title, it's not listed twice)
-- Lets you override yesterday's auto-fetched tasks
-- Mix Jira selections with custom text (e.g., `1,3,write docs`)
-- Copies output to clipboard via `xclip` or `xsel`
+- Skips weekends automatically (Monday looks back to Friday); header says `Last working day (Friday):` when it isn't literally yesterday
+- One line format for PRs and Jira: `RSNT-692 title`, with `fix:`/`feat:` prefixes stripped
+- Deduplicates by ticket key across PRs and Jira
+- Edit lists in place (`-N` remove, text add) instead of retyping
+- Today's list pre-selects carried-over tickets and in-progress statuses
+- Copies output to clipboard via `wl-copy`, `xclip` or `xsel`
 
 ## Data Sources
 
 | Source | Yesterday | Today |
 |--------|-----------|-------|
-| GitHub PRs | Merged PRs since last workday | - |
+| GitHub PRs | Merged, raised and reviewed PRs since last workday | - |
 | Jira | Updated tickets in current sprint | Active tickets in current sprint (not Done) |
