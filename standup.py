@@ -239,11 +239,14 @@ def select_today(tickets, yesterday_tasks):
 
 # --- Output ---
 
-def format_standup(yesterday_tasks, today_tasks, since):
-    lines = [period_header(since)]
-    lines += [f"*        {t}" for t in yesterday_tasks]
-    lines += ["", "Today:"]
-    lines += [f"*        {t}" for t in today_tasks]
+def format_standup(yesterday_tasks, today_tasks, since, plain=False):
+    """Slack style by default: bold headers, real bullet characters (paste-safe)."""
+    head = (lambda h: h) if plain else (lambda h: f"*{h}*")
+    bullet = "*        " if plain else "\u2022 "
+    lines = [head(period_header(since))]
+    lines += [f"{bullet}{t}" for t in yesterday_tasks]
+    lines += ["", head("Today:")]
+    lines += [f"{bullet}{t}" for t in today_tasks]
     return "\n".join(lines)
 
 
@@ -263,6 +266,7 @@ def main():
     ap = argparse.ArgumentParser(description="Generate your daily standup from GitHub + Jira.")
     ap.add_argument("--since", metavar="YYYY-MM-DD", help="look back to this date (e.g. after a holiday)")
     ap.add_argument("--days", type=int, metavar="N", help="look back N days")
+    ap.add_argument("--plain", action="store_true", help="old '*        ' layout without Slack bold/bullets")
     args = ap.parse_args()
 
     since = resolve_since(args)
@@ -304,7 +308,7 @@ def main():
         print("  No today tasks entered. Aborting.")
         sys.exit(0)
 
-    standup = format_standup(yesterday_tasks, today_tasks, since)
+    standup = format_standup(yesterday_tasks, today_tasks, since, plain=args.plain)
     print("\n" + "=" * 40 + "\n  COPY BELOW INTO SLACK\n" + "=" * 40 + "\n")
     print(standup)
     print("\n" + "=" * 40 + "\n")

@@ -43,4 +43,10 @@ assert s.select_today(tickets, ["AB-1 done thing"]) == ["AB-2 x", "AB-3 x", "pro
 feed("+3,prod release", "-4", "")  # remove a custom entry
 assert s.select_today(tickets, []) == ["AB-2 x", "AB-3 x"]
 
+# slack formatting
+fri = datetime(2026, 9, 18)
+out = s.format_standup(["A", "B"], ["C"], fri).splitlines()
+assert out[0] == "*Last working day (Friday):*" and out[1] == "\u2022 A" and out[3] == "" and out[4] == "*Today:*"
+assert s.format_standup(["A"], ["C"], fri, plain=True).splitlines()[1] == "*        A"
+
 print("all checks passed")

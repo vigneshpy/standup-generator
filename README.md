@@ -11,14 +11,16 @@ CLI tool that auto-generates your daily standup by fetching data from GitHub and
 ## Output Format
 
 ```
-Yesterday:
-*        [CLIENT-7550] apply link tag missing on back fix
-*        [CLIENT-7663] remove subscriber from task
+*Last working day (Friday):*
+• CLIENT-7550 apply link tag missing on back fix
+• CLIENT-7663 remove subscriber from task
 
-Today:
-*        RSNT-165 OVERRIDE CODE CLEAN UP
-*        RSNT prod release
+*Today:*
+• RSNT-165 OVERRIDE CODE CLEAN UP
+• RSNT prod release
 ```
+
+Bold headers render in Slack when *Preferences → Advanced → Format messages with markup* is on. The bullets are real `•` characters, so they paste cleanly into threads regardless. `--plain` gives the old `*        task` layout.
 
 ## Prerequisites
 
@@ -87,6 +89,7 @@ export GITHUB_ORGS=org1,org2
 python3 standup.py                    # looks back to the last working day
 python3 standup.py --since 2026-09-17 # after a holiday: look back to a specific date
 python3 standup.py --days 2           # or N days
+python3 standup.py --plain            # old layout, no Slack bold/bullets
 ```
 
 Editing prompts: `Enter` keeps the list, `-2` removes item 2, `+3` adds ticket 3, `1,4` picks exactly, any other text is added as a custom task.
