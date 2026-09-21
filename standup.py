@@ -251,7 +251,11 @@ def format_standup(yesterday_tasks, today_tasks, since, plain=False):
 
 
 def copy_to_clipboard(text):
-    for cmd in [["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "--clipboard", "--input"]]:
+    for cmd in [
+        ["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "--clipboard", "--input"],  # Linux
+        ["pbcopy"],  # macOS
+        ["clip"],    # Windows
+    ]:
         try:
             if subprocess.run(cmd, input=text.encode(), timeout=5,
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
